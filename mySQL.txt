@@ -1,0 +1,98 @@
+G00007918
+Applied Databases Project MySQL Section 
+
+
+Q. 4.1.1
+
+create procedure get_ppl_visited_country_4(countryInput varchar(52))
+deterministic
+begin
+  select p.personID, p.personname, c.name as cityName, hvc.datearrived, co.name as countryName
+  from person p  
+  join hasvisitedcity hvc on hvc.personID = p.personID 
+  join city c on c.id = hvc.cityID
+  join country co on co.code = c.countrycode
+  where co.name like CONCAT('%', countryInput, '%');
+end 
+
+
+
+Q. 4.1.2
+
+CREATE FUNCTION ren_continent_2(input CHAR(50))
+RETURNS CHAR(50) DETERMINISTIC
+RETURN
+CASE
+    WHEN input = "North America" THEN "Americas"
+    WHEN input = "South America" THEN "Americas"
+    WHEN input = "Oceania" THEN "Australia"
+    WHEN input = "Antarctica" THEN "South Pole"
+    ELSE ""
+END;
+select continent as OriginalName, ren_continent_2('oceania') as NewName 
+from country 
+where continent = 'oceania';
+
+
+Q. 4.1.3
+
+select name, continent, population 
+from country 
+where population in (
+  select max(population) 
+  from country 
+  where population > 0 
+  group by continent) 
+order by population desc;
+
+
+Q. 4.1.4
+
+select min(ci.population) as lowestPop, ci.name, p.personname, min(p.age) as lowestAge 
+from person p   
+join hasvisitedcity hvc on hvc.personID = p.personID   
+join city ci on ci.id = hvc.cityid 
+group by p.age 
+order by p.age asc;
+
+
+Q. 4.1.5
+
+SELECT district, population,
+CASE
+    WHEN district = "Eastern Cape" THEN population + 1000
+    WHEN district = "free state" THEN population + 2000
+    WHEN district = "western cape" THEN population - 10000
+END as 'cityPopChange'
+FROM city
+
+
+Q. 4.1.6
+
+select name, IndepYear, population,
+case 
+  when population > 100000000 THEN 
+    case 
+        when IndepYear > 2010 then concat('New large ', governmentform)
+        when indepyear between year(curdate())-50 and year(curdate())-10 then concat('Modern large ', governmentform)
+        when indepyear between year(curdate())-100 and year(curdate())-50 then concat('Early large ', governmentform)
+        when indepyear < year(curdate())-100 then concat('Old large ', governmentform)
+  end
+else
+  case
+    when IndepYear is null then 'n/a'
+  else
+    case 
+      when IndepYear > 2010 then concat('New ', governmentform) 
+      when indepyear between year(curdate())-50 and year(curdate())-10 then concat('Modern ', governmentform)
+      when indepyear between year(curdate())-100 and year(curdate())-50 then concat('Early ', governmentform)
+      when indepyear < year(curdate())-100 then concat('Old ', governmentform)
+    end
+  end
+end as 'Desc',
+governmentform
+from country;
+
+
+
+

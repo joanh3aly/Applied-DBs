@@ -1,0 +1,51 @@
+G00007918  
+Applied Databases Project MongoDB Section 
+
+Q. 4.3.1
+
+db.docs.aggregate( 
+    {"$unwind":"$car"},
+    {"$group": { "_id": null ,"average": 
+        { "$avg": "$car.engineSize"} 
+    }
+})
+
+
+Q. 4.3.2
+
+db.docs.aggregate( [
+  {
+    "$bucket": {
+      "groupBy": "$pop",
+      "boundaries": [ 0, 50000, 100000, 150000 ],
+      "default": "Other",
+      "output": {
+        "counties" : { "$push": "$name" }
+      }
+    }
+  }
+])
+
+
+Q. 4.3.3
+
+db.docs.aggregate([
+  {"$project": 
+    {
+      "_id": 1,
+      "name": 1,
+      "pop": {
+        "$cond": { 
+          "if": { "$lt": [ "$pop", 100000 ] }, 
+            "then": "Small County",
+          "else": {
+            "$cond": {
+              "if": { "$gt": ["$pop",99999]}, 
+                "then": "Big county", 
+              "else": 0
+            }
+          }    
+        }
+      }       
+  }}  
+]);
